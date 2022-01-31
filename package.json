@@ -1,0 +1,19 @@
+{
+  "name": "voting-bracket-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for creating tournament brackets and voting to decide the winner",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Renzo Espinoza",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "dotenv": "^15.0.0",
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
