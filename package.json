@@ -4,11 +4,16 @@
   "description": "Discord bot for creating tournament brackets and voting to decide the winner",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Renzo Espinoza",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^15.0.0",
     "express": "^4.17.2"
