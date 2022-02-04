@@ -1,2 +1,2 @@
 # voting-bracket-bot
- A Discord bot for creating tournament brackets where server members vote on the winner
+ Voting Bracket Bot is a Discord bot used for creating a tournament bracket where the members of a server vote to decide the winner.
