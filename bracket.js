@@ -1,4 +1,4 @@
-const {channelPrompt} = require('./prompts');
+const prompts = require('./prompts');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -9,9 +9,12 @@ module.exports = {
 		await interaction.reply({ content: "Check your direct messages for the following steps to create a bracket", ephemeral: true });
 		if(!interaction.user.dmChannel) await interaction.user.createDM();
 		let dmChannel = interaction.user.dmChannel;
-		let channel;
+		let bracketChannel, title, numContestants, bracketSize, byes;
 		try{
-			channel = await channelPrompt(dmChannel, interaction.channel, interaction.guild.channels);
+			bracketChannel = await prompts.channelPrompt(dmChannel, interaction.channel, interaction.guild.channels);
+			title = await prompts.titlePrompt(dmChannel);
+			[numContestants, bracketSize, byes] = await prompts.amountPrompt(dmChannel);
+			dmChannel.send(numContestants, bracketSize, byes)
 		} catch(e){
 			console.log(e);
 			if(e === 'exit') await dmChannel.send('Bracket has been canceled')
