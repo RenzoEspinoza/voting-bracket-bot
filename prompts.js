@@ -1,4 +1,5 @@
 const { MessageEmbed } = require('discord.js');
+const {WAIT_TIME} = require('./config');
 
 function createEmbed(title, description, footer='') {
 	const defaultFooter = footer + "Type 'exit' to cancel the bracket";
@@ -11,10 +12,10 @@ function createEmbed(title, description, footer='') {
 
 async function awaitMessage(dmChannel, condition, errMsg){
 	let msgs;
-	msgs = await dmChannel.awaitMessages({max: 1, time:7000, errors: ['time']});
+	msgs = await dmChannel.awaitMessages({max: 1, time:WAIT_TIME, errors: ['time']});
 	while(condition(msgs.first().content) && msgs.first().content != 'exit'){
         await dmChannel.send(errMsg)
-		msgs = await dmChannel.awaitMessages({max: 1, time:5000, errors: ['time']});
+		msgs = await dmChannel.awaitMessages({max: 1, time:WAIT_TIME, errors: ['time']});
 	}
     if(msgs.first().content === 'exit'){
         throw 'exit';
@@ -24,7 +25,7 @@ async function awaitMessage(dmChannel, condition, errMsg){
 
 async function channelPrompt(dmChannel, intChannel, guildChannels) {
 	const title = 'Where would you like to post this bracket?';
-	const description = `**1**: in the current channel, ${intChannel}\n**2**: in another channel.`;
+	const description = `**1**: in the current channel, ${intChannel}\n**2**: in another channel`;
 	const footer = 'Enter a number to choose.\n';
     const embed = createEmbed(title, description, footer);
     const channels = await guildChannels.fetch();
@@ -62,7 +63,6 @@ async function amountPrompt(dmChannel){
     const embed = createEmbed(title,description);
     const twoToEight = (msg) => {
         const num = Number(msg);
-        console.log(num);
         return num < 2 || num > 8;
     }
     let retry = '2', retryMessage, numContestants, bracketSize, byes;
@@ -71,15 +71,30 @@ async function amountPrompt(dmChannel){
         numContestants = await awaitMessage(dmChannel, twoToEight, 'Your entry was invalid. Enter a number between 2 and 8.');
         bracketSize = Math.pow(2, (Math.ceil(Math.log2(numContestants))));
         byes = bracketSize - numContestants;
-        retryMessage = createEmbed(`Bracket size will be ${bracketSize} entries`, `There will be ${byes} byes. Would you like to\n **1**: Continue\nEnter a new amount of contestants`);
+        retryMessage = createEmbed(`Bracket size will be ${bracketSize} entries`, `There will be ${byes} byes. Would you like to\n **1**: Continue\n**2**: Enter a new amount of contestants`);
         await dmChannel.send({embeds: [retryMessage]});
         retry = await awaitMessage(dmChannel, oneTwo, oneTwoError);
     }
     return [numContestants, bracketSize, byes];
 }
 
+async function randomPrompt(dmChannel){
+    const title = 'Would you like to assign the matchups or have it done randomly?';
+    const description = '**1**: Assign matchups yourself\n**2**: Assign matchups randomly';
+    const footer = '2 is recommended as it is easier';
+    const embed = createEmbed(title, description, footer);
+    await dmChannel.send({embeds:[embed]});
+    const random = await awaitMessage(dmChannel, oneTwo, oneTwoError);
+    if(random === '1'){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
 const oneTwo = (msg) =>{
-    return msg != '1' && msg !='2'
+    return msg != '1' && msg !='2';
 }
 const oneTwoError = 'Your entry was invalid. Type one of the two numbers shown above.';
 
@@ -87,4 +102,5 @@ module.exports = {
     channelPrompt,
     titlePrompt,
     amountPrompt,
+    randomPrompt
 }

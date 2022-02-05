@@ -9,12 +9,12 @@ module.exports = {
 		await interaction.reply({ content: "Check your direct messages for the following steps to create a bracket", ephemeral: true });
 		if(!interaction.user.dmChannel) await interaction.user.createDM();
 		let dmChannel = interaction.user.dmChannel;
-		let bracketChannel, title, numContestants, bracketSize, byes;
+		let bracketChannel, title, numContestants, bracketSize, byes, random;
 		try{
 			bracketChannel = await prompts.channelPrompt(dmChannel, interaction.channel, interaction.guild.channels);
 			title = await prompts.titlePrompt(dmChannel);
 			[numContestants, bracketSize, byes] = await prompts.amountPrompt(dmChannel);
-			dmChannel.send(numContestants, bracketSize, byes)
+			random = await prompts.randomPrompt(dmChannel)
 		} catch(e){
 			console.log(e);
 			if(e === 'exit') await dmChannel.send('Bracket has been canceled')
