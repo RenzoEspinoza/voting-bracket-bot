@@ -1,24 +1,15 @@
-const { MessageEmbed } = require('discord.js');
+const {embedPrompt} = require('./embeds');
 const {WAIT_TIME} = require('./config');
-
-function createEmbed(title, description, footer='') {
-	const defaultFooter = footer + "Type 'exit' to cancel the bracket";
-	return new MessageEmbed()
-		.setColor('#FF4040')
-		.setTitle(title)
-		.setDescription(description)
-		.setFooter(defaultFooter)
-}
 
 async function awaitMessage(dmChannel, condition, errMsg){
 	let msgs;
 	msgs = await dmChannel.awaitMessages({max: 1, time:WAIT_TIME, errors: ['time']});
-	while(condition(msgs.first().content) && msgs.first().content != 'exit'){
+	while(condition(msgs.first().content) && msgs.first().content != '!exit'){
         await dmChannel.send(errMsg)
 		msgs = await dmChannel.awaitMessages({max: 1, time:WAIT_TIME, errors: ['time']});
 	}
-    if(msgs.first().content === 'exit'){
-        throw 'exit';
+    if(msgs.first().content === '!exit'){
+        throw '!exit';
     }
     return msgs.first().content;
 }
@@ -27,7 +18,7 @@ async function channelPrompt(dmChannel, intChannel, guildChannels) {
 	const title = 'Where would you like to post this bracket?';
 	const description = `**1**: in the current channel, ${intChannel}\n**2**: in another channel`;
 	const footer = 'Enter a number to choose.\n';
-    const embed = createEmbed(title, description, footer);
+    const embed = embedPrompt(title, description, footer);
     const channels = await guildChannels.fetch();
 	await dmChannel.send({embeds: [embed]});
 	const result = await awaitMessage(dmChannel, oneTwo, oneTwoError);
@@ -35,7 +26,7 @@ async function channelPrompt(dmChannel, intChannel, guildChannels) {
         return intChannel;
     }
     else if(result === '2'){
-        const anotherChannel = createEmbed('Enter the name of the channel', 'Channel must be from the server you sent the slash command from.');
+        const anotherChannel = embedPrompt('Enter the name of the channel', 'Channel must be from the server you sent the slash command from.');
         await dmChannel.send({embeds: [anotherChannel]});
         function channelExists(msg){
             return !channels.some(channel => channel.type==='GUILD_TEXT' && channel.name===msg);
@@ -48,7 +39,7 @@ async function channelPrompt(dmChannel, intChannel, guildChannels) {
 async function titlePrompt(dmChannel){
     const embedTitle = 'Enter the title of the bracket';
 	const description = 'Up to 32 characters permitted.';
-    const embed = createEmbed(embedTitle, description);
+    const embed = embedPrompt(embedTitle, description);
     await dmChannel.send({embeds: [embed]});
     const longerThan = (msg) =>{
         return msg.length > 32;
@@ -60,37 +51,25 @@ async function titlePrompt(dmChannel){
 async function amountPrompt(dmChannel){
     const title = 'How many contestants?';
 	const description = '2 to 8 contestants are permitted.\nIdeally 2, 4, or 8 to avoid byes.';
-    const embed = createEmbed(title,description);
+    const embed = embedPrompt(title,description);
     const twoToEight = (msg) => {
         const num = Number(msg);
         return num < 2 || num > 8;
     }
-    let retry = '2', retryMessage, numContestants, bracketSize, byes;
+    let retry = '2', continueMessage, numContestants, bracketSize;
     while(retry === '2'){
         await dmChannel.send({embeds: [embed]});
         numContestants = await awaitMessage(dmChannel, twoToEight, 'Your entry was invalid. Enter a number between 2 and 8.');
         bracketSize = Math.pow(2, (Math.ceil(Math.log2(numContestants))));
-        byes = bracketSize - numContestants;
-        retryMessage = createEmbed(`Bracket size will be ${bracketSize} entries`, `There will be ${byes} byes. Would you like to\n **1**: Continue\n**2**: Enter a new amount of contestants`);
-        await dmChannel.send({embeds: [retryMessage]});
+        continueMessage = embedPrompt(`Bracket size will be ${bracketSize} entries`, 
+        `There will be ${bracketSize - numContestants} byes. Would you like to
+        **1**: Continue
+        **2**: Enter a new amount of contestants`,
+        'A bye is an automatic win for the opposing contestant. Byes are used to fill up a bracket where the number of participants is not a power of 2\n');
+        await dmChannel.send({embeds: [continueMessage]});
         retry = await awaitMessage(dmChannel, oneTwo, oneTwoError);
     }
-    return [numContestants, bracketSize, byes];
-}
-
-async function randomPrompt(dmChannel){
-    const title = 'Would you like to assign the matchups or have it done randomly?';
-    const description = '**1**: Assign matchups yourself\n**2**: Assign matchups randomly';
-    const footer = '2 is recommended as it is easier';
-    const embed = createEmbed(title, description, footer);
-    await dmChannel.send({embeds:[embed]});
-    const random = await awaitMessage(dmChannel, oneTwo, oneTwoError);
-    if(random === '1'){
-        return false;
-    }
-    else{
-        return true;
-    }
+    return [Number(numContestants), bracketSize];
 }
 
 const oneTwo = (msg) =>{
@@ -102,5 +81,4 @@ module.exports = {
     channelPrompt,
     titlePrompt,
     amountPrompt,
-    randomPrompt
 }
