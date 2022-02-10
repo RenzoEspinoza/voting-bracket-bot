@@ -3,7 +3,7 @@ const {embed} = require('./embeds');
 async function randomBracket(dmChannel, numContestants) {
     const ask = embed(`Enter ${numContestants} contestants.`, randomExplanation);
     await dmChannel.send({embeds: [ask]});
-    const regex = /^"([^\n"]{1,32})" *\(([\w\S)][^)]+)\)?$/i;
+    const regex = /^"([^\n"]{1,32})" *(\(([\w\S]+)\))?$/i;
     const entries = await getContestants(dmChannel, regex, numContestants);
     return entries;
 }
@@ -17,7 +17,7 @@ async function getContestants(dmChannel, regex, numEntries){
             msg = await dmChannel.awaitMessages({max: 1, time:15000, errors:['time']});
         }
         let match = regex.exec(msg.first().content);
-        msgs[i] = {title: match[1], link: match[2]};
+        msgs[i] = {title: match[1], link: match[3]};
         await dmChannel.send(`Entry accepted. ${numEntries-i-1} more to go.`);
     }
     return msgs;
