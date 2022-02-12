@@ -5,6 +5,7 @@ async function randomBracket(dmChannel, numContestants) {
     await dmChannel.send({embeds: [ask]});
     const regex = /^"([^\n"]{1,32})" *(\(([\w\S]+)\))?$/i;
     const entries = await getContestants(dmChannel, regex, numContestants);
+    dmChannel.send('Bracket entries saved. Please wait while the bracket is being generated...')
     return entries;
 }
 
@@ -17,7 +18,7 @@ async function getContestants(dmChannel, regex, numEntries){
             msg = await dmChannel.awaitMessages({max: 1, time:15000, errors:['time']});
         }
         let match = regex.exec(msg.first().content);
-        msgs[i] = {title: match[1], link: match[3]};
+        msgs[i] = {id: i, name: match[1], link: match[3]};
         await dmChannel.send(`Entry accepted. ${numEntries-i-1} more to go.`);
     }
     return msgs;
@@ -34,6 +35,9 @@ const randomExplanation = `Enter each contestant in a separate message one-by-on
 
 Links can either be a direct link to an image or a Youtube video link.
 For YouTube links, the thumbnail of the video will be displayed in the bracket and the video will be shared in chat come voting time.
+For image links, the url must link to a picture, not a webpage containing a picture.
+For example, https://en.wikipedia.org/wiki/Cat#/media/File:Cat_poster_1.jpg would not work, but https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Cat_poster_1.jpg/1920px-Cat_poster_1.jpg would
+
 Links are optional, if you would like no image to be displayed in the bracket then just type the name of the contestant.
 
 For example:
