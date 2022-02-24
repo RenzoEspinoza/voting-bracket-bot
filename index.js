@@ -1,11 +1,11 @@
 const config = require('./config');
 const {Client, Collection, Intents} = require('discord.js');
-const bracket = require('./bracket');
+const bracketCommand = require('./bracketCommand');
 const about = require('./about');
 
-const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS]});
+const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.DIRECT_MESSAGES]});
 client.commands = new Collection();
-client.commands.set(bracket.data.name, bracket);
+client.commands.set(bracketCommand.data.name, bracketCommand);
 client.commands.set(about.data.name, about);
 
 client.once('ready', () => {
