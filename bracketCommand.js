@@ -18,7 +18,7 @@ module.exports = {
 		await interaction.reply({ content: "Check your direct messages for the following steps to create a bracket", ephemeral: true });
 		if(!interaction.user.dmChannel) await interaction.user.createDM();
 		let dmChannel = interaction.user.dmChannel;
-		let bracketChannel, title, numContestants, bracketSize, contestants, bracketId, votingTime;
+		let bracketChannel, title, numContestants, bracketSize, contestants, bracketId;
 		try{
 			bracketChannel = await prompts.channelPrompt(dmChannel, interaction.channel, interaction.guild.channels);
 			title = await prompts.titlePrompt(dmChannel);
@@ -35,6 +35,12 @@ module.exports = {
 			await bracket.resizeContestantImages();
 			await bracket.initializeImage();
 			await proceedPrompt(dmChannel, bracket.id, bracket.channel);
+			const thread = await bracket.channel.threads.create({
+				name: bracket.title,
+				autoArchiveDuration: 60,
+				reason: `New tournament created by ${interaction.user.username}`
+			})
+			bracket.channel = thread;
 			const commenceMessage = new MessageEmbed()
 				.setColor('#6867AC')
 				.setTitle(`"${bracket.title}" Tournament has commenced`)
@@ -48,8 +54,12 @@ module.exports = {
     		}
 		} catch(e){
 			console.log(e);
-			if(e === '!exit') await dmChannel.send('Bracket has been canceled')
-			else await dmChannel.send('You took too long to respond. Try again later.')
+			if(e === '!exit'){
+				await dmChannel.send('Bracket has been canceled');
+				return;
+			}
+			if(e instanceof Map) await dmChannel.send('You took too long to respond. Try again later.');
+			else await dmChannel.send('There was an unexpected error. Please try again later.')
 			return
 		}
 	},

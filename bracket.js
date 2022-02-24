@@ -4,29 +4,6 @@ const { MessageActionRow, MessageButton, MessageEmbed} = require('discord.js');
 const fs = require('fs');
 const wait = require('util').promisify(setTimeout);
 
-async function test(bracketChannel, dmChannel){
-    let entries = contestants.slice(0,3);
-    const bracketSize = 4;
-    const votingRoundAmount = Math.log2(bracketSize);
-    const votingTime = await votingTimePrompt(dmChannel);
-    const bracket = new Bracket(213,'This title should be 32 characte', entries, votingTime, bracketChannel, bracketSize);
-    await bracket.resizeContestantImages();
-    await bracket.initializeImage();
-    await proceedPrompt(dmChannel, bracket.id, bracket.channel);
-    const commenceMessage = new MessageEmbed()
-        .setColor('#6867AC')
-        .setTitle(`"${bracket.title}" Tournament has commenced`)
-        .setDescription('Members of this server will vote to decide the winner of each matchup.\n The first round of voting will begin shortly!')
-        .setImage('attachment://bracket.png')
-    await bracket.channel.send({embeds: [commenceMessage], files: [`./images/${bracket.id}/bracket.png`]});
-    await wait(10000)
-    for(let i=0; i<votingRoundAmount; i++){
-        await bracket.roundOfVoting();
-        await wait(10000);
-    }
-    console.log(bracket);
-}
-
 class Contestant{
     constructor(id, name, link, youtube=false){
         this.id = id;
@@ -336,19 +313,8 @@ function getRandomItem(arr){
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     let ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
     return { width: srcWidth*ratio, height: srcHeight*ratio };
- }
-
-const contestants = [
-    new Contestant(1, '16 characters lo', 'https://www.youtube.com/watch?v=rwgwSomR0B8', true),
-    new Contestant(2, '20 characters long m', 'image url'),
-    new Contestant(3, '24 characters long 24242', '3'),
-    new Contestant(4, 'cow', '4'),
-    new Contestant(5, 'pig', '5'),
-    new Contestant(6, 'bird', '6'),
-    new Contestant(7, 'fox', '7'),
-    new Contestant(8, 'duck', '8'),
-]
-
+}
+ 
 const two = [
     {x: 20, y: 391},
     {x: 1144, y: 391},
