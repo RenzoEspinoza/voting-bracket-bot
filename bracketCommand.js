@@ -1,6 +1,6 @@
 const prompts = require('./prompts');
 const fetchContestants = require('./fetchContestants');
-const {Bracket} = require('./Bracket');
+const {Bracket} = require('./bracket');
 const {fetchImages} = require('./fetchImages');
 const {v4: uuidv4} = require('uuid');
 const {MessageEmbed} = require('discord.js')
@@ -47,7 +47,7 @@ module.exports = {
 				.setDescription('Members of this server will vote to decide the winner of each matchup.\n The first round of voting will begin shortly!')
 				.setImage('attachment://bracket.png')
 			await bracket.channel.send({embeds: [commenceMessage], files: [`./images/${bracket.id}/bracket.png`]});
-			await wait(10000);
+			await wait(15000);
 			for(let i=0; i<votingRoundAmount; i++){
 				await bracket.roundOfVoting();
 				await wait(10000);

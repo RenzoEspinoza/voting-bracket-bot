@@ -1,5 +1,5 @@
 const {embed} = require('./embeds');
-const {Contestant} = require('./Bracket');
+const {Contestant} = require('./bracket');
 const {WAIT_TIME} = require('./config');
 
 async function randomBracket(dmChannel, numContestants) {
